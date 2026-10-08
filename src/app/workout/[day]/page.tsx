@@ -23,8 +23,12 @@ export default async function WorkoutDayPage({ params }: { params: Promise<{ day
       <SiteHeader />
 
       <div className="mx-auto max-w-4xl space-y-8 px-4 py-8">
-        <Link href="/" className="text-sm text-zinc-400 hover:text-white">
-          ← Back to dashboard
+        <Link
+          href="/"
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-base font-bold text-zinc-950 shadow-lg shadow-orange-950/30 transition hover:bg-orange-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-300 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+        >
+          <span aria-hidden="true">←</span>
+          Back to dashboard
         </Link>
 
         <section className={`rounded-3xl bg-gradient-to-br ${plan.gradient} p-8 shadow-2xl`}>
