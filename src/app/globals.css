@@ -1,0 +1,453 @@
+@import "tailwindcss";
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background: #09090b;
+}
+
+body {
+  position: relative;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(59, 130, 246, 0.09), transparent 38rem),
+    linear-gradient(180deg, #09090b 0%, #0c0c10 48%, #09090b 100%);
+}
+
+::selection {
+  color: #09090b;
+  background: #fbbf24;
+}
+
+/* Ambient background: fixed and non-interactive so the interface stays crisp. */
+.app-ambient {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.app-content {
+  position: relative;
+  z-index: 1;
+}
+
+.ambient-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.18;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, black 0%, transparent 72%);
+  transform-origin: center top;
+  animation: grid-breathe 12s ease-in-out infinite alternate;
+}
+
+.ambient-grain {
+  position: absolute;
+  inset: -50%;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.9'/%3E%3C/svg%3E");
+  animation: grain-shift 0.25s steps(2) infinite;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.14;
+  will-change: transform;
+}
+
+.ambient-orb-one {
+  width: 34rem;
+  height: 34rem;
+  top: -14rem;
+  right: -10rem;
+  background: #2563eb;
+  animation: orb-one 18s ease-in-out infinite alternate;
+}
+
+.ambient-orb-two {
+  width: 30rem;
+  height: 30rem;
+  left: -15rem;
+  top: 38%;
+  background: #7c3aed;
+  animation: orb-two 22s ease-in-out infinite alternate;
+}
+
+.ambient-orb-three {
+  width: 26rem;
+  height: 26rem;
+  right: -12rem;
+  bottom: -12rem;
+  background: #ea580c;
+  animation: orb-three 20s ease-in-out infinite alternate;
+}
+
+/* Every route arrives softly instead of popping into view. */
+.route-enter {
+  animation: route-arrive 0.65s var(--ease-out-expo) both;
+}
+
+/* Main page sections cascade in sequence. */
+main > div:not(.fixed) > section,
+main > div:not(.fixed) > ul,
+main > div:not(.fixed) > article,
+main > div:not(.fixed) > div:not(:first-child) {
+  opacity: 0;
+  animation: reveal-up 0.72s var(--ease-out-expo) forwards;
+}
+
+main > div:not(.fixed) > :nth-child(1) { animation-delay: 50ms; }
+main > div:not(.fixed) > :nth-child(2) { animation-delay: 110ms; }
+main > div:not(.fixed) > :nth-child(3) { animation-delay: 170ms; }
+main > div:not(.fixed) > :nth-child(4) { animation-delay: 230ms; }
+main > div:not(.fixed) > :nth-child(5) { animation-delay: 290ms; }
+main > div:not(.fixed) > :nth-child(n + 6) { animation-delay: 350ms; }
+
+/* Gradient hero panels slowly shift, with a soft light sweep on hover. */
+.hero-motion,
+section.bg-gradient-to-br {
+  position: relative;
+  isolation: isolate;
+  background-size: 180% 180%;
+  animation: gradient-drift 9s ease-in-out infinite alternate;
+}
+
+.hero-motion::after,
+section.bg-gradient-to-br::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -50%;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.13) 50%, transparent 62%);
+  transform: translateX(-48%) rotate(8deg);
+  animation: hero-sheen 7s ease-in-out infinite;
+}
+
+/* Repeated rows cascade individually after their containing section appears. */
+.stagger-list > * {
+  opacity: 0;
+  animation: reveal-up 0.62s var(--ease-out-expo) forwards;
+}
+
+.stagger-list > :nth-child(1) { animation-delay: 100ms; }
+.stagger-list > :nth-child(2) { animation-delay: 150ms; }
+.stagger-list > :nth-child(3) { animation-delay: 200ms; }
+.stagger-list > :nth-child(4) { animation-delay: 250ms; }
+.stagger-list > :nth-child(5) { animation-delay: 300ms; }
+.stagger-list > :nth-child(6) { animation-delay: 350ms; }
+.stagger-list > :nth-child(7) { animation-delay: 400ms; }
+.stagger-list > :nth-child(n + 8) { animation-delay: 450ms; }
+
+.celebration-icon {
+  display: inline-block;
+  animation: trophy-arrive 0.9s var(--ease-spring) both, trophy-float 2.8s ease-in-out 1s infinite;
+  filter: drop-shadow(0 12px 24px rgba(251, 191, 36, 0.25));
+}
+
+/* Cards feel elevated while remaining calm and functional. */
+.motion-card,
+a.group.rounded-3xl,
+a.block.rounded-3xl,
+article.rounded-3xl {
+  transform: translateZ(0);
+  transition:
+    transform 0.5s var(--ease-out-expo),
+    box-shadow 0.5s var(--ease-out-expo),
+    border-color 0.35s ease,
+    background-color 0.35s ease;
+}
+
+a.group.rounded-3xl:hover,
+a.block.rounded-3xl:hover {
+  transform: translateY(-6px) scale(1.008);
+  box-shadow: 0 24px 70px -28px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+/* Exercise photos gain subtle cinematic motion. */
+img {
+  transition: transform 0.75s var(--ease-out-expo), filter 0.5s ease;
+}
+
+article:hover img,
+a.group:hover img,
+a.block:hover img {
+  transform: scale(1.045);
+  filter: saturate(1.08) contrast(1.03);
+}
+
+/* Buttons and links have deliberately bold tactile feedback. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+button:not(:disabled),
+a.touch-link,
+a.action-button {
+  transition:
+    transform 0.34s var(--ease-spring),
+    filter 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.34s var(--ease-out-expo),
+    color 0.25s ease;
+}
+
+button:not(:disabled):hover,
+a:hover {
+  filter: brightness(1.09);
+}
+
+a {
+  transition: transform 0.3s var(--ease-spring), filter 0.25s ease, color 0.25s ease, background-color 0.25s ease;
+}
+
+a:active {
+  transform: scale(0.94) translateY(1px);
+  filter: brightness(1.2) saturate(1.15);
+  transition-duration: 75ms !important;
+}
+
+button:not(:disabled):active,
+a.touch-link:active,
+a.action-button:active,
+.touch-burst:active {
+  transform: scale(0.91) translateY(2px) !important;
+  filter: brightness(1.22) saturate(1.2);
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.07), 0 4px 16px rgba(0, 0, 0, 0.45) !important;
+  transition-duration: 80ms !important;
+}
+
+button:not(:disabled)::before,
+a.touch-link::before,
+.touch-burst::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 50%;
+  left: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 9999px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.38);
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0);
+}
+
+button:not(:disabled):active::before,
+a.touch-link:active::before,
+.touch-burst:active::before {
+  animation: touch-impact 0.48s ease-out;
+}
+
+button:not(:disabled),
+a.touch-link,
+.touch-burst {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+button:not(:disabled) > *,
+a.touch-link > *,
+.touch-burst > * {
+  position: relative;
+  z-index: 1;
+}
+
+.delete-trigger:active {
+  color: #fff1f2 !important;
+  background: rgba(244, 63, 94, 0.32) !important;
+  box-shadow: 0 0 0 6px rgba(244, 63, 94, 0.1), 0 0 28px rgba(244, 63, 94, 0.3) !important;
+}
+
+.danger-pulse:hover {
+  animation: danger-breathe 1.4s ease-in-out infinite;
+}
+
+.modal-backdrop {
+  animation: modal-fade 0.24s ease-out both;
+}
+
+.modal-panel {
+  animation: modal-rise 0.5s var(--ease-spring) both;
+}
+
+.shine-button {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.shine-button::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -3px;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.5) 48%, transparent 66%);
+  transform: translateX(-130%);
+  transition: transform 0.8s var(--ease-out-expo);
+}
+
+.shine-button:hover::after {
+  transform: translateX(130%);
+}
+
+/* Progress fills and status changes slide naturally. */
+.progress-motion {
+  transform-origin: left;
+  transition: width 0.8s var(--ease-out-expo);
+  background-size: 200% 100%;
+  animation: progress-shimmer 2.8s linear infinite;
+}
+
+.timer-card-active {
+  animation: timer-glow 2s ease-in-out infinite;
+}
+
+.timer-finished {
+  animation: complete-pop 0.55s var(--ease-spring) both;
+}
+
+.exercise-stage {
+  animation: exercise-arrive 0.55s var(--ease-out-expo) both;
+}
+
+.set-complete {
+  animation: complete-pop 0.45s var(--ease-spring) both;
+}
+
+/* Accessible, beautiful focus treatment for keyboard users. */
+:focus-visible {
+  outline: 2px solid #fbbf24;
+  outline-offset: 3px;
+  border-radius: 0.75rem;
+}
+
+/* Styled scrollbars fit the dark visual language. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+::-webkit-scrollbar { width: 10px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  border: 3px solid transparent;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.18);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.3); }
+
+@keyframes route-arrive {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(22px); filter: blur(3px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes exercise-arrive {
+  from { opacity: 0; transform: translateX(16px) scale(0.985); filter: blur(3px); }
+  to { opacity: 1; transform: translateX(0) scale(1); filter: blur(0); }
+}
+
+@keyframes gradient-drift {
+  0% { background-position: 0% 40%; }
+  100% { background-position: 100% 60%; }
+}
+
+@keyframes hero-sheen {
+  0%, 64% { transform: translateX(-48%) rotate(8deg); opacity: 0; }
+  72% { opacity: 1; }
+  90%, 100% { transform: translateX(48%) rotate(8deg); opacity: 0; }
+}
+
+@keyframes progress-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes complete-pop {
+  0% { transform: scale(0.96); }
+  55% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+
+@keyframes timer-glow {
+  0%, 100% { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.08), 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.25), 0 0 24px rgba(251, 146, 60, 0.08); }
+}
+
+@keyframes grid-breathe {
+  from { opacity: 0.12; transform: scale(1); }
+  to { opacity: 0.24; transform: scale(1.035); }
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(2%, -1%); }
+  50% { transform: translate(-1%, 2%); }
+  75% { transform: translate(1%, 1%); }
+  100% { transform: translate(-2%, -1%); }
+}
+
+@keyframes orb-one {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-10vw, 12vh, 0) scale(1.15); }
+}
+
+@keyframes orb-two {
+  from { transform: translate3d(0, 0, 0) scale(0.9); }
+  to { transform: translate3d(14vw, -10vh, 0) scale(1.12); }
+}
+
+@keyframes orb-three {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-12vw, -8vh, 0) scale(1.18); }
+}
+
+@media (max-width: 640px) {
+  .ambient-orb { filter: blur(70px); opacity: 0.1; }
+  .ambient-grid { background-size: 44px 44px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  main > div:not(.fixed) > section,
+  main > div:not(.fixed) > ul,
+  main > div:not(.fixed) > article,
+  main > div:not(.fixed) > div:not(:first-child) {
+    opacity: 1;
+  }
+}
