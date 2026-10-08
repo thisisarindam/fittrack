@@ -1,0 +1,12 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/api/health/route": "/api/health",
+  "/api/logs/[id]/route": "/api/logs/[id]",
+  "/api/sessions/[id]/route": "/api/sessions/[id]",
+  "/api/sessions/route": "/api/sessions",
+  "/history/page": "/history",
+  "/page": "/",
+  "/session/[id]/page": "/session/[id]",
+  "/workout/[day]/page": "/workout/[day]"
+}
