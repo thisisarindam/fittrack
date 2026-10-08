@@ -171,8 +171,22 @@ export function SessionPlayer({ session, initialLogs }: { session: SessionRow; i
   const summary = summarizeLogs(logs);
   const progressPct = total ? Math.round((summary.completed / total) * 100) : 0;
   const current = logs[index];
-  const item = plan.items[index];
-  const ex = item ? CATALOG[item.slug] : undefined;
+  const plannedItem = plan.items[index];
+  const legacyItem =
+    current?.exerciseSlug === "chest-press"
+      ? { slug: "chest-press", sets: 3, prescription: "3 × 8–12", rest: "90 sec", restSeconds: 90 }
+      : current?.exerciseSlug === "leg-extension"
+        ? {
+            slug: "leg-extension",
+            sets: 3,
+            prescription: "2–3 × 10–15",
+            rest: "60–90 sec",
+            restSeconds: 75,
+            note: "Start with 2 sets; add a 3rd if it still feels controlled.",
+          }
+        : undefined;
+  const item = current && current.exerciseSlug !== plannedItem?.slug ? legacyItem : plannedItem;
+  const ex = current ? CATALOG[current.exerciseSlug] : undefined;
   const targetRange = item ? (item.prescription.match(/\d+(?:–\d+)?/g) ?? []).at(-1) ?? "" : "";
 
   function save(id: number, patch: LogPatch) {
@@ -298,7 +312,7 @@ export function SessionPlayer({ session, initialLogs }: { session: SessionRow; i
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         {logs.map((l, i) => {
-          const chipEx = CATALOG[plan.items[i]?.slug ?? ""];
+          const chipEx = CATALOG[l.exerciseSlug];
           const active = i === index;
           return (
             <button
