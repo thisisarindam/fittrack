@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CATALOG, DAYS, DAY_ORDER, RULES, isDayKey } from "@/lib/plan";
 import { SiteHeader } from "@/components/site-header";
 import { WorkoutActions } from "@/components/workout-actions";
+import { ExerciseImage } from "@/components/exercise-image";
 
 export const dynamicParams = false;
 
@@ -58,7 +59,14 @@ export default async function WorkoutDayPage({ params }: { params: Promise<{ day
                 className="flex flex-col overflow-hidden rounded-3xl bg-zinc-900 ring-1 ring-white/10 sm:flex-row"
               >
                 <div className="relative aspect-video w-full shrink-0 bg-zinc-800 sm:aspect-auto sm:w-64">
-                  <img src={ex?.image} alt={ex?.name ?? ""} loading="lazy" className="h-full w-full object-cover" />
+                  {ex && (
+                    <ExerciseImage
+                      src={ex.image}
+                      name={ex.name}
+                      className="absolute inset-0 h-full w-full"
+                      imageClassName="h-full w-full object-cover"
+                    />
+                  )}
                   <span className="absolute left-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-zinc-950/80 text-sm font-bold">
                     {i + 1}
                   </span>

@@ -6,6 +6,7 @@ import { completeWorkoutSession, updateExerciseLog, type SetLog } from "@/lib/st
 import { CATALOG, DAYS, type DayKey, type ExerciseKind } from "@/lib/plan";
 import { summarizeLogs } from "@/lib/summary";
 import { RestTimer } from "@/components/rest-timer";
+import { ExerciseImage } from "@/components/exercise-image";
 
 export type LogRow = {
   id: number;
@@ -323,9 +324,14 @@ export function SessionPlayer({ session, initialLogs }: { session: SessionRow; i
 
       <article key={current.id} className="exercise-stage overflow-hidden rounded-3xl bg-zinc-900 shadow-[0_30px_80px_-35px_rgba(0,0,0,0.9)] ring-1 ring-white/10">
         <div className="relative aspect-[16/9] bg-zinc-800">
-          <img src={ex.image} alt={ex.name} className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
-          <div className="absolute bottom-4 left-5 right-5">
+          <ExerciseImage
+            src={ex.image}
+            name={ex.name}
+            className="absolute inset-0 h-full w-full"
+            imageClassName="h-full w-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/30 to-transparent" />
+          <div className="pointer-events-none absolute bottom-4 left-5 right-5">
             <p className="text-xs font-semibold uppercase tracking-widest text-white/70">
               Exercise {index + 1} of {total}
             </p>

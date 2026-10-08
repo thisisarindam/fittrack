@@ -11,83 +11,83 @@ export type CatalogExercise = {
   cue: string;
 };
 
-const exerciseImage = `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/exercises/fitness-placeholder.svg`;
+const exerciseImage = (slug: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/exercises/${slug}.svg`;
 
 export const CATALOG: Record<string, CatalogExercise> = {
   elliptical: {
     name: "Elliptical",
     kind: "cardio",
-    image: exerciseImage,
+    image: exerciseImage("elliptical"),
     muscles: "Warm-up · full body",
     cue: "Easy to moderate pace. Smooth, relaxed strides — you should be able to talk comfortably.",
   },
   "goblet-dumbbell-squat": {
     name: "Goblet Dumbbell Squat",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("goblet-dumbbell-squat"),
     muscles: "Quads · glutes · core",
     cue: "Hold one dumbbell vertically at your chest. Keep your chest tall, sit your hips down between your knees, and drive through your whole foot to stand.",
   },
   "db-squat": {
     name: "Dumbbell Squat",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("db-squat"),
     muscles: "Quads · glutes · core",
     cue: "Dumbbells at your sides. Sit hips back and down, keep chest up and knees tracking over toes. Stand tall through the whole foot.",
   },
   "chest-press": {
     name: "Chest Press",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("chest-press"),
     muscles: "Chest · triceps · front delts",
     cue: "Seat so the handles line up with mid-chest. Press forward smoothly, stop short of locking elbows, and control the return.",
   },
   "lat-pulldown": {
     name: "Lat Pulldown",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("lat-pulldown"),
     muscles: "Lats · biceps · upper back",
     cue: "Grip slightly wider than shoulders. Pull the bar to upper chest, lead with the elbows, keep your torso mostly upright.",
   },
   "seated-row": {
     name: "Seated Row",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("seated-row"),
     muscles: "Mid back · rear delts · biceps",
     cue: "Sit tall with a slight lean. Pull the handle to your lower ribs, squeeze shoulder blades together, then let the arms stretch fully.",
   },
   "hamstring-curl": {
     name: "Seated Hamstring Curl",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("hamstring-curl"),
     muscles: "Hamstrings",
     cue: "Pad sits just above your heels. Curl down smoothly, pause briefly, and return slowly — no swinging.",
   },
   "leg-extension": {
     name: "Leg Extension",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("leg-extension"),
     muscles: "Quadriceps",
     cue: "Line your knee up with the machine pivot. Extend fully, pause a beat at the top, and lower under control.",
   },
   "db-shoulder-press": {
     name: "Dumbbell Shoulder Press",
     kind: "strength",
-    image: exerciseImage,
+    image: exerciseImage("db-shoulder-press"),
     muscles: "Shoulders · triceps",
     cue: "Sit upright with your back supported. Press the dumbbells overhead without arching your lower back; lower to about ear level.",
   },
   plank: {
     name: "Plank",
     kind: "hold",
-    image: exerciseImage,
+    image: exerciseImage("plank"),
     muscles: "Core · abs · glutes",
     cue: "Forearms under shoulders, body in one straight line from head to heels. Squeeze glutes, breathe steadily, no sagging hips.",
   },
   cardio: {
     name: "Cardio Finisher",
     kind: "cardio",
-    image: exerciseImage,
+    image: exerciseImage("cardio"),
     muscles: "Conditioning · fat burn",
     cue: "Treadmill, elliptical or cycle at a steady, conversational pace.",
   },
