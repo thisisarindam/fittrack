@@ -11,7 +11,8 @@ export type CatalogExercise = {
   cue: string;
 };
 
-const exerciseImage = (slug: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/exercises/${slug}.svg`;
+const exerciseImage = (slug: string, extension = "jpg") =>
+  `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/exercises/${slug}.${extension}`;
 
 export const CATALOG: Record<string, CatalogExercise> = {
   elliptical: {
@@ -45,7 +46,7 @@ export const CATALOG: Record<string, CatalogExercise> = {
   "lat-pulldown": {
     name: "Lat Pulldown",
     kind: "strength",
-    image: exerciseImage("lat-pulldown"),
+    image: exerciseImage("lat-pulldown", "webp"),
     muscles: "Lats · biceps · upper back",
     cue: "Grip slightly wider than shoulders. Pull the bar to upper chest, lead with the elbows, keep your torso mostly upright.",
   },

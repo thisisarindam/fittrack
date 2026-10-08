@@ -1,6 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" fill="none">
-  <defs><linearGradient id="bg" x1="40" y1="12" x2="734" y2="430" gradientUnits="userSpaceOnUse"><stop stop-color="#7f1d1d"/><stop offset="1" stop-color="#18181b"/></linearGradient><linearGradient id="a" x1="222" y1="202" x2="583" y2="330" gradientUnits="userSpaceOnUse"><stop stop-color="#fda4af"/><stop offset="1" stop-color="#fb7185"/></linearGradient></defs>
-  <path fill="url(#bg)" d="M0 0h800v450H0z"/><circle cx="642" cy="93" r="126" fill="#fb7185" opacity=".12"/><path d="M0 368h800" stroke="#fff" stroke-opacity=".12"/>
-  <ellipse cx="412" cy="369" rx="181" ry="15" fill="#020617" opacity=".45"/><circle cx="292" cy="168" r="24" fill="#e7b78f"/><path d="m313 184 112 39 99-9 71 38-99 26-109-20-94-40 20-34Z" fill="url(#a)"/><path d="m349 196-39 41-39 14m141-24-50 43-35 14m169-65 46 44 5 32m8-31 52 29 21 1" stroke="#e7b78f" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/><path d="m280 253-14 26h52m0 10h114" stroke="#fda4af" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/><path d="M230 333h355" stroke="#fb7185" stroke-width="7" stroke-linecap="round" stroke-dasharray="7 13"/>
-  <text x="40" y="55" fill="#ffe4e6" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="4">CORE · STABILITY</text>
-</svg>
