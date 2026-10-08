@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import type { SetLog } from "@/db/schema";
+import { completeWorkoutSession, updateExerciseLog, type SetLog } from "@/lib/storage";
 import { CATALOG, DAYS, type DayKey, type ExerciseKind } from "@/lib/plan";
 import { summarizeLogs } from "@/lib/summary";
 import { RestTimer } from "@/components/rest-timer";
@@ -174,23 +174,18 @@ export function SessionPlayer({ session, initialLogs }: { session: SessionRow; i
   const ex = item ? CATALOG[item.slug] : undefined;
   const targetRange = item ? (item.prescription.match(/\d+(?:–\d+)?/g) ?? []).at(-1) ?? "" : "";
 
-  async function save(id: number, patch: LogPatch) {
+  function save(id: number, patch: LogPatch) {
     try {
-      const res = await fetch(`/api/logs/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patch),
-      });
-      if (!res.ok) throw new Error("save failed");
+      updateExerciseLog(id, patch);
       setError(null);
-    } catch {
-      setError("Couldn't save your last change. Check your connection and try again.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Couldn't save your last change.");
     }
   }
 
   function update(id: number, patch: LogPatch) {
     setLogs((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l)));
-    void save(id, patch);
+    save(id, patch);
   }
 
   function updateSet(log: LogRow, setIndex: number, next: SetLog) {
@@ -198,19 +193,14 @@ export function SessionPlayer({ session, initialLogs }: { session: SessionRow; i
     update(log.id, { sets });
   }
 
-  async function finishWorkout() {
+  function finishWorkout() {
     try {
-      const res = await fetch(`/api/sessions/${session.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "finish" }),
-      });
-      if (!res.ok) throw new Error("finish failed");
-      const data = (await res.json()) as { completedAt: string | null };
-      setCompletedAt(data.completedAt);
+      const finishedAt = new Date().toISOString();
+      completeWorkoutSession(session.id, finishedAt);
+      setCompletedAt(finishedAt);
       setFinished(true);
-    } catch {
-      setError("Couldn't finish the workout. Please try again.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Couldn't finish the workout.");
     }
   }
 

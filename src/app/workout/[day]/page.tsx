@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { and, desc, eq, isNull } from "drizzle-orm";
-import { db } from "@/db";
-import { workoutSessions } from "@/db/schema";
 import { CATALOG, DAYS, DAY_ORDER, RULES, isDayKey } from "@/lib/plan";
-import { DeleteSessionButton } from "@/components/delete-session-button";
 import { SiteHeader } from "@/components/site-header";
-import { StartWorkoutButton } from "@/components/start-workout-button";
+import { WorkoutActions } from "@/components/workout-actions";
 
-export const dynamic = "force-dynamic";
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return DAY_ORDER.map((day) => ({ day }));
+}
 
 export default async function WorkoutDayPage({ params }: { params: Promise<{ day: string }> }) {
   const { day } = await params;
@@ -16,13 +16,6 @@ export default async function WorkoutDayPage({ params }: { params: Promise<{ day
   if (!isDayKey(key)) notFound();
 
   const plan = DAYS[key];
-
-  const [open] = await db
-    .select()
-    .from(workoutSessions)
-    .where(and(eq(workoutSessions.dayKey, key), isNull(workoutSessions.completedAt)))
-    .orderBy(desc(workoutSessions.startedAt))
-    .limit(1);
 
   return (
     <main className="min-h-screen pb-32">
@@ -109,16 +102,7 @@ export default async function WorkoutDayPage({ params }: { params: Promise<{ day
             </p>
             <p className="text-xs text-zinc-500">Log each set as you go. Progress saves automatically.</p>
           </div>
-          <div className="flex items-center gap-2">
-            {open ? (
-              <>
-                <DeleteSessionButton sessionId={open.id} status="active" compact />
-                <StartWorkoutButton dayKey={key} resumeId={open.id} />
-              </>
-            ) : (
-              <StartWorkoutButton dayKey={key} />
-            )}
-          </div>
+          <WorkoutActions dayKey={key} />
         </div>
       </div>
     </main>

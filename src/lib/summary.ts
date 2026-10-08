@@ -1,4 +1,4 @@
-import type { SetLog } from "@/db/schema";
+import type { SetLog } from "@/lib/storage";
 
 export function summarizeLogs(logs: { completed: boolean; sets: SetLog[] }[]) {
   let completed = 0;

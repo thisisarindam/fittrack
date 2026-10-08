@@ -1,14 +1,13 @@
+"use client";
+
 import Link from "next/link";
-import { and, desc, eq, gte, inArray, isNotNull, isNull, sql } from "drizzle-orm";
-import { db } from "@/db";
-import { exerciseLogs, workoutSessions } from "@/db/schema";
-import { CATALOG, DAYS, DAY_ORDER, getNextScheduledDay, type DayKey } from "@/lib/plan";
+import { useEffect, useState } from "react";
+import { CATALOG, DAYS, DAY_ORDER, getNextScheduledDay } from "@/lib/plan";
 import { summarizeLogs } from "@/lib/summary";
 import { DeleteSessionButton } from "@/components/delete-session-button";
 import { SiteHeader } from "@/components/site-header";
 import { StartWorkoutButton } from "@/components/start-workout-button";
-
-export const dynamic = "force-dynamic";
+import { useWorkoutData } from "@/lib/use-workout-data";
 
 function startOfWeek(date: Date) {
   const d = new Date(date);
@@ -18,50 +17,38 @@ function startOfWeek(date: Date) {
   return d;
 }
 
-export default async function HomePage() {
-  const now = new Date();
-  const weekStart = startOfWeek(now);
+export default function HomePage() {
+  const { sessions, logs, ready, error } = useWorkoutData();
+  const [now, setNow] = useState<Date | null>(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setNow(new Date()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
+  const currentDate = now ?? new Date(0);
+  const weekStart = startOfWeek(currentDate);
 
-  const [openSession] = await db
-    .select()
-    .from(workoutSessions)
-    .where(isNull(workoutSessions.completedAt))
-    .orderBy(desc(workoutSessions.startedAt))
-    .limit(1);
+  const openSession = sessions.find((session) => !session.completedAt);
+  const recent = sessions.slice(0, 6);
+  const allTime = sessions.filter((session) => session.completedAt).length;
+  const doneThisWeek = new Set(
+    sessions
+      .filter((session) => session.completedAt && new Date(session.completedAt) >= weekStart)
+      .map((session) => session.dayKey),
+  );
+  const recentIds = new Set(recent.map((session) => session.id));
+  const recentLogs = logs.filter((log) => recentIds.has(log.sessionId));
 
-  const recent = await db
-    .select()
-    .from(workoutSessions)
-    .orderBy(desc(workoutSessions.startedAt))
-    .limit(6);
-
-  const [{ allTime }] = await db
-    .select({ allTime: sql<number>`count(*)::int` })
-    .from(workoutSessions)
-    .where(isNotNull(workoutSessions.completedAt));
-
-  const weekDone = await db
-    .select({ dayKey: workoutSessions.dayKey })
-    .from(workoutSessions)
-    .where(and(isNotNull(workoutSessions.completedAt), gte(workoutSessions.completedAt, weekStart)));
-
-  const doneThisWeek = new Set(weekDone.map((s) => s.dayKey));
-
-  const recentIds = recent.map((s) => s.id);
-  const recentLogs = recentIds.length
-    ? await db.select().from(exerciseLogs).where(inArray(exerciseLogs.sessionId, recentIds))
-    : [];
-
-  const next = getNextScheduledDay(now);
+  const next = getNextScheduledDay(currentDate);
   const nextDay = next.day;
 
-  const openDay = openSession ? DAYS[openSession.dayKey as DayKey] : null;
+  const openDay = openSession ? DAYS[openSession.dayKey] : null;
 
   return (
     <main className="min-h-screen pb-16">
       <SiteHeader />
 
       <div className="mx-auto max-w-6xl space-y-8 px-4 py-8">
+        {error && <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p>}
         {/* Hero */}
         <section className={`relative overflow-hidden rounded-3xl bg-gradient-to-br ${nextDay.gradient} p-8 shadow-2xl`}>
           <div className="absolute -right-10 -top-10 h-48 w-48 rounded-full bg-white/10 blur-2xl" />
@@ -77,8 +64,10 @@ export default async function HomePage() {
               : `${nextDay.items.length} exercises · ${nextDay.duration}. Go one exercise at a time and log every set.`}
           </p>
           <div className="mt-6">
-            {openSession ? (
-              <StartWorkoutButton dayKey={openSession.dayKey as DayKey} resumeId={openSession.id} />
+            {!ready ? (
+              <p className="text-sm text-white/80">Loading saved workouts…</p>
+            ) : openSession ? (
+              <StartWorkoutButton dayKey={openSession.dayKey} resumeId={openSession.id} />
             ) : (
               <StartWorkoutButton dayKey={nextDay.key} />
             )}
@@ -87,9 +76,9 @@ export default async function HomePage() {
 
         {/* Stats */}
         <section className="grid grid-cols-3 gap-4">
-          <Stat label="This week" value={`${doneThisWeek.size}/3`} hint="scheduled sessions" />
-          <Stat label="All-time" value={String(allTime)} hint="completed workouts" />
-          <Stat label="In progress" value={openSession ? "1" : "0"} hint={openSession ? "unfinished" : "none"} />
+          <Stat label="This week" value={ready ? `${doneThisWeek.size}/3` : "—"} hint="scheduled sessions" />
+          <Stat label="All-time" value={ready ? String(allTime) : "—"} hint="completed workouts" />
+          <Stat label="In progress" value={ready ? (openSession ? "1" : "0") : "—"} hint={openSession ? "unfinished" : "none"} />
         </section>
 
         {/* Schedule */}
@@ -147,25 +136,27 @@ export default async function HomePage() {
         {/* Recent */}
         <section>
           <h2 className="mb-4 text-xl font-bold">Recent sessions</h2>
-          {recent.length === 0 ? (
+          {!ready ? (
+            <p className="text-sm text-zinc-400">Loading saved workouts…</p>
+          ) : recent.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-white/15 p-10 text-center text-zinc-400">
               No workouts yet. Start your first one above!
             </div>
           ) : (
             <ul className="stagger-list divide-y divide-white/10 overflow-hidden rounded-3xl bg-zinc-900 ring-1 ring-white/10">
               {recent.map((s) => {
-                const day = DAYS[s.dayKey as DayKey];
+                const day = DAYS[s.dayKey];
                 const logs = recentLogs.filter((l) => l.sessionId === s.id);
                 const sum = summarizeLogs(logs);
                 return (
                   <li key={s.id} className="group/recent flex items-stretch transition-colors hover:bg-white/5">
-                    <Link href={`/session/${s.id}`} className="touch-link flex min-w-0 flex-1 items-center justify-between gap-4 px-5 py-4">
+                    <Link href={`/session?id=${s.id}`} className="touch-link flex min-w-0 flex-1 items-center justify-between gap-4 px-5 py-4">
                       <div className="min-w-0">
                         <p className="truncate font-semibold">
                           {day?.weekday} · {day?.title}
                         </p>
                         <p className="text-xs text-zinc-400">
-                          {s.startedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          {new Date(s.startedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                         </p>
                       </div>
                       <div className="shrink-0 text-right">

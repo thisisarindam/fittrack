@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { deleteWorkoutSession } from "@/lib/storage";
 
 type Props = {
   sessionId: number;
@@ -41,17 +42,15 @@ export function DeleteSessionButton({
     };
   }, [open, deleting]);
 
-  async function remove() {
+  function remove() {
     setDeleting(true);
     setError(null);
     try {
-      const response = await fetch(`/api/sessions/${sessionId}`, { method: "DELETE" });
-      if (!response.ok) throw new Error("Delete failed");
+      deleteWorkoutSession(sessionId);
       setOpen(false);
       if (redirectTo) router.push(redirectTo);
-      router.refresh();
-    } catch {
-      setError("Could not delete this session. Please try again.");
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not delete this session. Please try again.");
       setDeleting(false);
     }
   }

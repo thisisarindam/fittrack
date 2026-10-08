@@ -1,25 +1,15 @@
+"use client";
+
 import Link from "next/link";
-import { desc, inArray } from "drizzle-orm";
-import { db } from "@/db";
-import { exerciseLogs, workoutSessions, type ExerciseLog, type WorkoutSession } from "@/db/schema";
 import { DAYS, type DayKey } from "@/lib/plan";
 import { summarizeLogs } from "@/lib/summary";
 import { DeleteSessionButton } from "@/components/delete-session-button";
 import { SiteHeader } from "@/components/site-header";
+import { useWorkoutData } from "@/lib/use-workout-data";
+import type { ExerciseLog, WorkoutSession } from "@/lib/storage";
 
-export const dynamic = "force-dynamic";
-
-export default async function HistoryPage() {
-  const sessions = await db
-    .select()
-    .from(workoutSessions)
-    .orderBy(desc(workoutSessions.startedAt))
-    .limit(100);
-
-  const ids = sessions.map((session) => session.id);
-  const logs: ExerciseLog[] = ids.length
-    ? await db.select().from(exerciseLogs).where(inArray(exerciseLogs.sessionId, ids))
-    : [];
+export default function HistoryPage() {
+  const { sessions, logs, ready, error } = useWorkoutData();
 
   const bySession = new Map<number, ExerciseLog[]>();
   for (const log of logs) {
@@ -35,6 +25,7 @@ export default async function HistoryPage() {
     <main className="min-h-screen pb-16">
       <SiteHeader />
       <div className="mx-auto max-w-4xl space-y-10 px-4 py-8">
+        {error && <p className="rounded-xl bg-rose-500/10 px-4 py-3 text-sm text-rose-300">{error}</p>}
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-violet-300">Your training archive</p>
           <h1 className="mt-2 text-3xl font-extrabold">Session history</h1>
@@ -43,7 +34,9 @@ export default async function HistoryPage() {
           </p>
         </div>
 
-        {sessions.length === 0 ? (
+        {!ready ? (
+          <p className="text-sm text-zinc-400">Loading saved workouts…</p>
+        ) : sessions.length === 0 ? (
           <div className="rounded-3xl border border-dashed border-white/15 bg-white/[0.02] p-12 text-center text-zinc-400">
             <div className="mb-4 text-4xl">📋</div>
             <p>No sessions yet.</p>
@@ -117,7 +110,10 @@ function SessionGroup({
             const summary = summarizeLogs(bySession.get(session.id) ?? []);
             const percentage = summary.total ? Math.round((summary.completed / summary.total) * 100) : 0;
             const minutes = session.completedAt
-              ? Math.max(1, Math.round((session.completedAt.getTime() - session.startedAt.getTime()) / 60000))
+              ? Math.max(
+                  1,
+                  Math.round((new Date(session.completedAt).getTime() - new Date(session.startedAt).getTime()) / 60000),
+                )
               : null;
 
             return (
@@ -126,7 +122,7 @@ function SessionGroup({
                 className="motion-card group/session relative overflow-hidden rounded-3xl bg-zinc-900 ring-1 ring-white/10 hover:-translate-y-1 hover:ring-white/25"
               >
                 <div className="flex items-stretch">
-                  <Link href={`/session/${session.id}`} className="touch-link min-w-0 flex-1 p-5 sm:p-6">
+                  <Link href={`/session?id=${session.id}`} className="touch-link min-w-0 flex-1 p-5 sm:p-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex min-w-0 items-center gap-4">
                         <div
@@ -139,7 +135,7 @@ function SessionGroup({
                             {day?.weekday} · {day?.title}
                           </p>
                           <p className="mt-1 text-xs text-zinc-400">
-                            {session.startedAt.toLocaleDateString("en-US", {
+                            {new Date(session.startedAt).toLocaleDateString("en-US", {
                               weekday: "short",
                               month: "short",
                               day: "numeric",

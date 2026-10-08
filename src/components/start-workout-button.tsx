@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { createWorkoutSession } from "@/lib/storage";
 import type { DayKey } from "@/lib/plan";
 
 type Props = {
@@ -18,25 +19,19 @@ export function StartWorkoutButton({ dayKey, resumeId, className }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleClick() {
+  function handleClick() {
     if (resumeId) {
-      router.push(`/session/${resumeId}`);
+      router.push(`/session?id=${resumeId}`);
       return;
     }
 
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/sessions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dayKey }),
-      });
-      if (!res.ok) throw new Error("Failed to start");
-      const data = (await res.json()) as { id: number };
-      router.push(`/session/${data.id}`);
-    } catch {
-      setError("Could not start the workout. Please try again.");
+      const session = createWorkoutSession(dayKey);
+      router.push(`/session?id=${session.id}`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Could not start the workout. Please try again.");
       setLoading(false);
     }
   }
